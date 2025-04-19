@@ -76,6 +76,8 @@ const Inventory: React.FC = () => {
 	}>({ show: false, message: "", type: "success" });
 
 	const nameInputRef = useRef<HTMLInputElement>(null);
+	const user = JSON.parse(localStorage.getItem("user") || "{}");
+	const isAdmin = user?.role === "admin";
 
 	useEffect(() => {
 		const fetchItems = async () => {
@@ -306,134 +308,135 @@ const Inventory: React.FC = () => {
 					</div>
 				</div>
 
-				{/* Add New Item Form */}
-				<div className="bg-gray-800 rounded-lg p-4 mb-6 shadow-lg">
-					<h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-						<Plus className="h-5 w-5 text-green-400" />
-						Add New Item
-					</h2>
+				{isAdmin && (
+					<div className="bg-gray-800 rounded-lg p-4 mb-6 shadow-lg">
+						<h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+							<Plus className="h-5 w-5 text-green-400" />
+							Add New Item
+						</h2>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
-						<div className="lg:col-span-2">
-							<label
-								htmlFor="item-name"
-								className="block text-sm font-medium text-gray-400 mb-1"
-							>
-								Item Name*
-							</label>
-							<input
-								id="item-name"
-								ref={nameInputRef}
-								type="text"
-								value={newItem}
-								onChange={(e) => setNewItem(e.target.value)}
-								onKeyDown={handleKeyDown}
-								placeholder="Enter item name"
-								className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-							/>
-						</div>
-
-						<div>
-							<label
-								htmlFor="item-price"
-								className="block text-sm font-medium text-gray-400 mb-1"
-							>
-								Price*
-							</label>
-							<div className="relative">
-								<span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-									$
-								</span>
+						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+							<div className="lg:col-span-2">
+								<label
+									htmlFor="item-name"
+									className="block text-sm font-medium text-gray-400 mb-1"
+								>
+									Item Name*
+								</label>
 								<input
-									id="item-price"
-									type="number"
-									step="0.01"
-									min="0"
-									value={newPrice}
-									onChange={(e) => setNewPrice(e.target.value)}
+									id="item-name"
+									ref={nameInputRef}
+									type="text"
+									value={newItem}
+									onChange={(e) => setNewItem(e.target.value)}
 									onKeyDown={handleKeyDown}
-									placeholder="0.00"
-									className="w-full pl-7 pr-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+									placeholder="Enter item name"
+									className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+								/>
+							</div>
+
+							<div>
+								<label
+									htmlFor="item-price"
+									className="block text-sm font-medium text-gray-400 mb-1"
+								>
+									Price*
+								</label>
+								<div className="relative">
+									<span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+										$
+									</span>
+									<input
+										id="item-price"
+										type="number"
+										step="0.01"
+										min="0"
+										value={newPrice}
+										onChange={(e) => setNewPrice(e.target.value)}
+										onKeyDown={handleKeyDown}
+										placeholder="0.00"
+										className="w-full pl-7 pr-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+									/>
+								</div>
+							</div>
+
+							<div>
+								<label
+									htmlFor="item-category"
+									className="block text-sm font-medium text-gray-400 mb-1"
+								>
+									Category
+								</label>
+								<select
+									id="item-category"
+									value={newCategory}
+									onChange={(e) => setNewCategory(e.target.value)}
+									className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+								>
+									{categories.map((category) => (
+										<option key={category} value={category}>
+											{category}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<div>
+								<label
+									htmlFor="item-stock"
+									className="block text-sm font-medium text-gray-400 mb-1"
+								>
+									Stock
+								</label>
+								<input
+									id="item-stock"
+									type="number"
+									min="0"
+									value={newStock}
+									onChange={(e) => setNewStock(e.target.value)}
+									onKeyDown={handleKeyDown}
+									placeholder="0"
+									className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
 								/>
 							</div>
 						</div>
 
-						<div>
-							<label
-								htmlFor="item-category"
-								className="block text-sm font-medium text-gray-400 mb-1"
-							>
-								Category
-							</label>
-							<select
-								id="item-category"
-								value={newCategory}
-								onChange={(e) => setNewCategory(e.target.value)}
-								className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-							>
-								{categories.map((category) => (
-									<option key={category} value={category}>
-										{category}
-									</option>
-								))}
-							</select>
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+							<div>
+								<label
+									htmlFor="item-barcode"
+									className="block text-sm font-medium text-gray-400 mb-1"
+								>
+									Barcode (Optional)
+								</label>
+								<input
+									id="item-barcode"
+									type="text"
+									value={newBarcode}
+									onChange={(e) => setNewBarcode(e.target.value)}
+									onKeyDown={handleKeyDown}
+									placeholder="Enter barcode"
+									className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+								/>
+							</div>
 						</div>
 
-						<div>
-							<label
-								htmlFor="item-stock"
-								className="block text-sm font-medium text-gray-400 mb-1"
+						<div className="flex justify-end">
+							<button
+								onClick={addItem}
+								disabled={saving || !newItem.trim() || !newPrice.trim()}
+								className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								Stock
-							</label>
-							<input
-								id="item-stock"
-								type="number"
-								min="0"
-								value={newStock}
-								onChange={(e) => setNewStock(e.target.value)}
-								onKeyDown={handleKeyDown}
-								placeholder="0"
-								className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-							/>
+								{saving ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									<Plus className="h-4 w-4" />
+								)}
+								Add Item
+							</button>
 						</div>
 					</div>
-
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-						<div>
-							<label
-								htmlFor="item-barcode"
-								className="block text-sm font-medium text-gray-400 mb-1"
-							>
-								Barcode (Optional)
-							</label>
-							<input
-								id="item-barcode"
-								type="text"
-								value={newBarcode}
-								onChange={(e) => setNewBarcode(e.target.value)}
-								onKeyDown={handleKeyDown}
-								placeholder="Enter barcode"
-								className="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-							/>
-						</div>
-					</div>
-
-					<div className="flex justify-end">
-						<button
-							onClick={addItem}
-							disabled={saving || !newItem.trim() || !newPrice.trim()}
-							className="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							{saving ? (
-								<Loader2 className="h-4 w-4 animate-spin" />
-							) : (
-								<Plus className="h-4 w-4" />
-							)}
-							Add Item
-						</button>
-					</div>
-				</div>
+				)}
 
 				{/* Inventory List */}
 				<div className="bg-gray-800 rounded-lg p-4 shadow-lg">

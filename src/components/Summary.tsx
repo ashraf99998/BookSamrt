@@ -75,6 +75,18 @@ const CHART_COLORS = {
 };
 
 const Summary: React.FC = () => {
+	const user = JSON.parse(localStorage.getItem("user") || "{}");
+	const isAdmin = user?.role === "admin";
+	if (!isAdmin) {
+		return (
+			<div className="min-h-screen bg-gray-900 text-white p-4 md:p-6 flex items-center justify-center text-center">
+				<h2 className="text-2xl font-bold text-red-500">
+					You are not allowed to view this page.
+				</h2>
+			</div>
+		);
+	}
+
 	const [salesData, setSalesData] = useState<SalesEntry[]>([]);
 	const [filteredData, setFilteredData] = useState<SalesEntry[]>([]);
 	const [dateFilter, setDateFilter] = useState<string>("all");
