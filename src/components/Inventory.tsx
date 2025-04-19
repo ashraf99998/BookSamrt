@@ -128,7 +128,7 @@ const Inventory: React.FC = () => {
 					updatedAt: new Date(),
 				};
 
-				const docRef = await addDoc(collection(db, "inventory"), itemData);
+				await addDoc(collection(db, "inventory"), itemData);
 
 				showNotification(`${newItem} added to inventory`, "success");
 

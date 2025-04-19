@@ -1,9 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+	getAuth,
+	signInWithPopup,
+	GoogleAuthProvider,
+	signOut,
+} from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
+import { useNavigate } from "react-router-dom";
 
 const Login: React.FC = () => {
+	const navigate = useNavigate();
 	const auth = getAuth();
 	const provider = new GoogleAuthProvider();
 	const [currentUser, setCurrentUser] = useState<any>(null);
@@ -13,37 +20,31 @@ const Login: React.FC = () => {
 		if (authLoading) return;
 		setAuthLoading(true);
 		try {
+			provider.setCustomParameters({
+				prompt: "select_account",
+			});
+
 			const result = await signInWithPopup(auth, provider);
 			const user = result.user;
+			const userData = {
+				uid: user.uid,
+				name: user.displayName,
+				email: user.email,
+				photoURL: user.photoURL,
+			};
 
 			const userRef = doc(db, "users", user.uid);
 			const userSnap = await getDoc(userRef);
-
 			if (!userSnap.exists()) {
-				await setDoc(userRef, {
-					name: user.displayName,
-					email: user.email,
-					role: "user",
-				});
+				await setDoc(userRef, { ...userData, role: "user" });
 			}
 
-			localStorage.setItem(
-				"user",
-				JSON.stringify({
-					uid: user.uid,
-					name: user.displayName,
-					email: user.email,
-				})
-			);
-			setCurrentUser(user);
-			console.log("Login successful!");
+			localStorage.setItem("user", JSON.stringify(userData));
+			setCurrentUser(userData);
+			alert("Login successful!");
+			navigate("/");
 		} catch (error: any) {
 			console.error("Login error:", error);
-			if (error.code === "auth/operation-not-allowed") {
-				console.log("Google Sign-In is not enabled for this project.");
-			} else {
-				console.log("Login failed. Please try again.");
-			}
 		} finally {
 			setAuthLoading(false);
 		}

@@ -6,7 +6,6 @@ import TrackScratchOff from "./components/TrackScratchOff";
 import Navbar from "./components/Navbar";
 import Requests from "./components/CustomerRequest";
 import Summary from "./components/Summary";
-import Login from "./components/Login";
 
 function App() {
 	return (
@@ -19,7 +18,6 @@ function App() {
 				<Route path="/scratchoff" element={<TrackScratchOff />} />
 				<Route path="/requests" element={<Requests />} />
 				<Route path="/summary" element={<Summary />} />
-				<Route path="/login" element={<Login />} />
 			</Routes>
 		</>
 	);
