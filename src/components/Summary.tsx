@@ -453,7 +453,7 @@ const Summary: React.FC = () => {
 													`${name}: ${(percent * 100).toFixed(0)}%`
 												}
 											>
-												{paymentMethodData.map((entry, index) => (
+												{paymentMethodData.map((_entry, index) => (
 													<Cell
 														key={`cell-${index}`}
 														fill={COLORS[index % COLORS.length]}
@@ -487,7 +487,7 @@ const Summary: React.FC = () => {
 													`${name}: ${(percent * 100).toFixed(0)}%`
 												}
 											>
-												{salesBreakdownData.map((entry, index) => (
+												{salesBreakdownData.map((_entry, index) => (
 													<Cell
 														key={`cell-${index}`}
 														fill={COLORS[index % COLORS.length]}

@@ -574,7 +574,7 @@ const TrackScratchOff: React.FC = () => {
 									</tr>
 								</thead>
 								<tbody>
-									{sortedRows.map((row, index) => {
+									{sortedRows.map((row, _index) => {
 										const originalIndex = rows.findIndex(
 											(r) => r.id === row.id
 										);

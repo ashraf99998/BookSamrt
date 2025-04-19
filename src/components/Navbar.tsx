@@ -12,7 +12,7 @@ import {
 } from "firebase/auth";
 
 const Navbar: React.FC = () => {
-	const [isMenuOpen, setIsMenuOpen] = useState(false);
+	const [isMenuOpen] = useState(false);
 	const [isSearchOpen, setIsSearchOpen] = useState(false);
 	const [currentUser, setCurrentUser] = useState<any>(null);
 	const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);

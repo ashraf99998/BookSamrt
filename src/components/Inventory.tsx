@@ -154,18 +154,18 @@ const Inventory: React.FC = () => {
 		}
 	};
 
-	const updateItem = async (id: string, data: Partial<Item>) => {
-		try {
-			await updateDoc(doc(db, "inventory", id), {
-				...data,
-				updatedAt: new Date(),
-			});
-			showNotification("Item updated successfully", "success");
-		} catch (error) {
-			console.error("Error updating item:", error);
-			showNotification("Failed to update item", "error");
-		}
-	};
+	// const updateItem = async (id: string, data: Partial<Item>) => {
+	// 	try {
+	// 		await updateDoc(doc(db, "inventory", id), {
+	// 			...data,
+	// 			updatedAt: new Date(),
+	// 		});
+	// 		showNotification("Item updated successfully", "success");
+	// 	} catch (error) {
+	// 		console.error("Error updating item:", error);
+	// 		showNotification("Failed to update item", "error");
+	// 	}
+	// };
 
 	const deleteItem = async (id: string, name: string) => {
 		if (window.confirm(`Are you sure you want to delete "${name}"?`)) {
