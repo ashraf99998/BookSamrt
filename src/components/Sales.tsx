@@ -35,19 +35,11 @@ const Sales: React.FC = () => {
 
 	useEffect(() => {
 		const inside = coins + cash + creditCards + ebt;
-		setInsideSales(inside);
 
 		const total =
-			inside +
-			onlineLotto +
-			instantLotto -
-			payouts -
-			expenses +
-			outsideSales +
-			tax1 +
-			tax2;
-		setTotalSales(total);
-
+			inside + onlineLotto + instantLotto + payouts + expenses + outsideSales;
+		setTotalSales(total + inside);
+		setInsideSales(inside + total);
 		setDifference(total - z1Total);
 	}, [
 		coins,
