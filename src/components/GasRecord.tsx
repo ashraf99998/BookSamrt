@@ -36,8 +36,6 @@ import {
 	CheckCircle2,
 	Loader2,
 	BarChart2,
-	ArrowDown,
-	ArrowUp,
 } from "lucide-react";
 
 interface GasRecord {
