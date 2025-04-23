@@ -122,9 +122,11 @@ const GasRecord: React.FC = () => {
 				const existing = records.find((r) => r.date === date);
 				return {
 					date,
-					regular: existing?.regular ?? "",
-					mid: existing?.mid ?? "",
-					premium: existing?.premium ?? "",
+					regular:
+						existing?.regular !== undefined ? Number(existing.regular) : 0,
+					mid: existing?.mid !== undefined ? Number(existing.mid) : 0,
+					premium:
+						existing?.premium !== undefined ? Number(existing.premium) : 0,
 				};
 			});
 
@@ -271,15 +273,6 @@ const GasRecord: React.FC = () => {
 		});
 	};
 
-	const getLevelTrend = (current: number, previous: number | "") => {
-		if (previous === "" || current === previous) return null;
-		return current > previous ? (
-			<ArrowUp className="h-4 w-4 text-green-400" />
-		) : (
-			<ArrowDown className="h-4 w-4 text-red-400" />
-		);
-	};
-
 	const calculateStats = () => {
 		if (chartData.length === 0)
 			return {
@@ -399,7 +392,7 @@ const GasRecord: React.FC = () => {
 											<td className="py-2 px-3 capitalize">{type}</td>
 											{recentRecords.map((r, idx) => (
 												<td key={idx} className="py-2 px-3 text-center">
-													{r[type] === "" ? "-" : r[type]}
+													{r[type] == null ? "-" : r[type]}
 												</td>
 											))}
 										</tr>
