@@ -38,8 +38,9 @@ interface TicketRow {
 
 const getRollLimit = (value: number) => {
 	if (value === 1) return 250;
-	if (value === 2 || value === 3) return 150;
-	if (value === 5) return 75;
+	if (value === 2) return 125;
+	if (value === 3) return 75;
+	if (value === 5) return 50;
 	if (value === 10 || value === 20) return 25;
 	return 0;
 };
@@ -69,6 +70,15 @@ const TrackScratchOff: React.FC = () => {
 	);
 
 	const [grandTotal, setGrandTotal] = useState(0);
+	const [fullRolls, setFullRolls] = useState<{ [key: number]: number }>({
+		1: 0,
+		2: 0,
+		3: 0,
+		5: 0,
+		10: 0,
+		20: 0,
+	});
+	const [pendingDate, setPendingDate] = useState<string | null>(null);
 	const [showSettings, setShowSettings] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -162,6 +172,50 @@ const TrackScratchOff: React.FC = () => {
 					currentRows = data.rows;
 					showNotification(`Loaded data for ${selectedDate}`, "success");
 				}
+			} else {
+				// Try to preserve "yesterday" from previous day if data exists
+				const selected = new Date(selectedDate);
+				selected.setDate(selected.getDate() - 1);
+				const prevDateString = selected.toISOString().split("T")[0];
+
+				const qPrev = query(
+					collection(db, "scratchoffs"),
+					where("dateString", "==", prevDateString)
+				);
+				const prevSnapshot = await getDocs(qPrev);
+
+				if (!prevSnapshot.empty) {
+					const prevData = prevSnapshot.docs[0].data();
+					if (prevData.rows) {
+						setRows((prevRows) =>
+							prevRows.map((row) => {
+								const prevMatch = prevData.rows.find(
+									(r: TicketRow) => r.id === row.id
+								);
+								return {
+									...row,
+									yesterday: prevMatch ? prevMatch.today : 0,
+									today: 0,
+									sold: 0,
+									total: 0,
+								};
+							})
+						);
+					}
+				} else {
+					setRows((prevRows) =>
+						prevRows.map((row) => ({
+							...row,
+							yesterday: 0,
+							today: 0,
+							sold: 0,
+							total: 0,
+						}))
+					);
+				}
+
+				showNotification(`No data found for ${selectedDate}`, "success");
+				return;
 			}
 
 			if (selectedDate !== new Date().toISOString().split("T")[0]) {
@@ -212,10 +266,18 @@ const TrackScratchOff: React.FC = () => {
 	) => {
 		setRows((prevRows) => {
 			const updated = [...prevRows];
+			const ticketValue = updated[index].value;
+			const rollLimit = getRollLimit(ticketValue);
+
+			if (field === "today") {
+				if (newValue < 0 || newValue >= rollLimit) {
+					return prevRows; // Ignore invalid input
+				}
+			}
+
 			updated[index][field] = newValue;
 			const yesterday = updated[index].yesterday;
 			const today = updated[index].today;
-			const rollLimit = getRollLimit(updated[index].value);
 
 			let sold = 0;
 			if (today >= yesterday) {
@@ -231,9 +293,14 @@ const TrackScratchOff: React.FC = () => {
 	};
 
 	useEffect(() => {
-		const sum = rows.reduce((acc, r) => acc + r.total, 0);
-		setGrandTotal(sum);
-	}, [rows]);
+		const rowTotal = rows.reduce((acc, r) => acc + r.total, 0);
+		const extraTotal = Object.entries(fullRolls).reduce(
+			(sum, [val, count]) =>
+				sum + Number(val) * getRollLimit(Number(val)) * count,
+			0
+		);
+		setGrandTotal(rowTotal + extraTotal);
+	}, [rows, fullRolls]);
 
 	const handleSaveSettings = async () => {
 		try {
@@ -260,11 +327,17 @@ const TrackScratchOff: React.FC = () => {
 	const handleSave = async () => {
 		try {
 			setSaving(true);
+			const extraTotal = Object.entries(fullRolls).reduce(
+				(sum, [val, count]) =>
+					sum + Number(val) * getRollLimit(Number(val)) * count,
+				0
+			);
 			const payload = {
 				rows,
 				date: Timestamp.now(),
 				dateString,
-				grandTotal,
+				grandTotal: grandTotal + extraTotal,
+				fullRolls,
 			};
 			await addDoc(collection(db, "scratchoffs"), payload);
 			showNotification("Scratch-off data saved successfully!", "success");
@@ -352,13 +425,24 @@ const TrackScratchOff: React.FC = () => {
 							<input
 								type="date"
 								className="bg-transparent border-none text-sm focus:outline-none focus:ring-0"
-								value={dateString}
+								value={pendingDate !== null ? pendingDate : dateString}
 								onChange={(e) => {
-									const selected = e.target.value;
-									setDateString(selected);
-									loadDataForSelectedDate(selected);
+									setPendingDate(e.target.value);
 								}}
 							/>
+							{pendingDate && (
+								<button
+									className="ml-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-md"
+									onClick={() => {
+										setDateString(pendingDate);
+										loadDataForSelectedDate(pendingDate);
+										setSortConfig({ key: null, direction: "ascending" });
+										setPendingDate(null);
+									}}
+								>
+									Apply Date
+								</button>
+							)}
 						</div>
 						<button
 							className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
@@ -598,30 +682,13 @@ const TrackScratchOff: React.FC = () => {
 												}`}
 											>
 												<td className="py-2 px-4">{row.id}</td>
-												<td className="py-2 px-4">
-													<div className="flex items-center">
-														<span className="text-gray-400 mr-1">$</span>
-														<input
-															type="number"
-															className="w-16 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-															value={row.value}
-															readOnly
-														/>
-													</div>
-												</td>
+												<td className="py-2 px-4">${row.value}</td>
+												<td className="py-2 px-4">{row.yesterday}</td>
 												<td className="py-2 px-4">
 													<input
 														type="number"
 														className="w-20 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-														value={row.yesterday}
-														readOnly
-													/>
-												</td>
-												<td className="py-2 px-4">
-													<input
-														type="number"
-														className="w-20 px-2 py-1 bg-gray-900 border border-gray-700 rounded text-white focus:outline-none focus:ring-2 focus:ring-green-500"
-														value={row.today}
+														value={row.today === 0 ? "" : row.today}
 														onChange={(e) =>
 															handleChange(
 																originalIndex,
@@ -663,6 +730,42 @@ const TrackScratchOff: React.FC = () => {
 							</table>
 						</div>
 					)}
+				</div>
+
+				{/* Full Roll Sales Section */}
+				<div className="bg-gray-800 rounded-lg p-4 shadow-lg mt-6">
+					<div className="flex items-center gap-2 mb-4">
+						<Ticket className="h-5 w-5 text-green-400" />
+						<h2 className="text-xl font-semibold">Full Roll Sales</h2>
+					</div>
+					<p className="text-sm text-gray-400 mb-4">
+						Record the number of full rolls sold for each denomination
+					</p>
+					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+						{[1, 2, 3, 5, 10, 20].map((value) => (
+							<div
+								key={`fullroll-${value}`}
+								className="bg-gray-700 p-3 rounded-md"
+							>
+								<label className="block text-sm mb-1 text-gray-300">
+									${value} Roll
+								</label>
+								<input
+									type="number"
+									className="w-full px-2 py-1 bg-gray-900 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-green-500"
+									min="0"
+									placeholder="0"
+									value={fullRolls[value]}
+									onChange={(e) =>
+										setFullRolls((prev) => ({
+											...prev,
+											[value]: Number(e.target.value) || 0,
+										}))
+									}
+								/>
+							</div>
+						))}
+					</div>
 				</div>
 			</div>
 		</div>

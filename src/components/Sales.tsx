@@ -23,7 +23,6 @@ const Sales: React.FC = () => {
 	const [tax1, setTax1] = useState(0);
 	const [tax2, setTax2] = useState(0);
 
-	const [insideSales, setInsideSales] = useState(0);
 	const [totalSales, setTotalSales] = useState(0);
 	const [difference, setDifference] = useState(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,11 +34,17 @@ const Sales: React.FC = () => {
 
 	useEffect(() => {
 		const inside = coins + cash + creditCards + ebt;
-
 		const total =
-			inside + onlineLotto + instantLotto + payouts + expenses + outsideSales;
-		setTotalSales(total + inside);
-		setInsideSales(inside + total);
+			inside +
+			onlineLotto +
+			instantLotto +
+			payouts +
+			expenses +
+			outsideSales +
+			tax1 +
+			tax2;
+
+		setTotalSales(total);
 		setDifference(total - z1Total);
 	}, [
 		coins,
@@ -92,7 +97,6 @@ const Sales: React.FC = () => {
 			outsideSales,
 			tax1,
 			tax2,
-			insideSales,
 			totalSales,
 			difference,
 			timestamp: new Date(),
@@ -247,7 +251,6 @@ const Sales: React.FC = () => {
 						</div>
 
 						<div className="bg-gray-800 p-4 rounded-lg mb-6 divide-y divide-gray-700">
-							<SummaryItem label="Inside Sales" value={insideSales} />
 							<SummaryItem label="Total Sales" value={totalSales} />
 							<SummaryItem label="Z1 Total" value={z1Total} />
 							<SummaryItem

@@ -172,6 +172,14 @@ const Navbar: React.FC = () => {
 									</li>
 									<li>
 										<Link
+											to="/gas"
+											className="hover:text-green-400 transition-colors"
+										>
+											Gas
+										</Link>
+									</li>
+									<li>
+										<Link
 											to="/users"
 											className="hover:text-green-400 transition-colors"
 										>
@@ -374,6 +382,15 @@ const Navbar: React.FC = () => {
 											onClick={toggleMenu}
 										>
 											Scratch-Off
+										</Link>
+									</li>
+									<li>
+										<Link
+											to="/gas"
+											className="block py-2 px-3 hover:bg-gray-700 rounded-md hover:text-green-400 transition-colors"
+											onClick={toggleMenu}
+										>
+											Gas
 										</Link>
 									</li>
 									<li>

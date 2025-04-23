@@ -7,6 +7,7 @@ import Navbar from "./components/Navbar";
 import Requests from "./components/CustomerRequest";
 import Summary from "./components/Summary";
 import Users from "./components/Users";
+import GasRecord from "./components/GasRecord";
 
 function App() {
 	return (
@@ -20,6 +21,7 @@ function App() {
 				<Route path="/requests" element={<Requests />} />
 				<Route path="/summary" element={<Summary />} />
 				<Route path="/users" element={<Users />} />
+				<Route path="/gas" element={<GasRecord />} />
 			</Routes>
 		</>
 	);
